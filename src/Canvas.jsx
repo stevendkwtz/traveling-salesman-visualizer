@@ -185,7 +185,7 @@ export default class Canvas extends React.Component {
 
     return (
       <div>
-        <FlatButton label='Add 50 Random Points' onClick={this.addRandomPoints.bind(null, 50)} disabled={this.state.running}/>
+        <FlatButton label='Add 10 Random Points' onClick={this.addRandomPoints.bind(null, 10)} disabled={this.state.running}/>
         <FlatButton label='Start' primary={true} onClick={this.runAlgorithm} disabled={this.state.points.length < 3 || !this.props.selectedAlgorithm || this.props.selectedAlgorithm === types.BRUTE_FORCE}/>
         <FlatButton label='Clear All' secondary={true} onClick={this.clearPoints} />
         <p>{stats}</p>
