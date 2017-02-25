@@ -111,7 +111,7 @@ export default class Canvas extends React.Component {
     }
 
 
-    for (let i = 1; i <= 1000; i++) {
+    for (let i = 1; i <= 10000; i++) {
       this.timeouts['timeout_' + i] = setTimeout(timeoutFunction.bind(null, i), (20*i))
     }
   }
@@ -124,10 +124,9 @@ export default class Canvas extends React.Component {
       result = annealLoop(result)
     }
 
-    for (let i = 1; i <= 1000; i++) {
-      this.timeouts['timeout_' + i] = setTimeout(timeoutFunction, (50*i))
+    for (let i = 1; i <= 10500; i++) {
+      this.timeouts['timeout_' + i] = setTimeout(timeoutFunction, (20*i))
     }
-
   }
 
   runBruteForceAlgorithm () {

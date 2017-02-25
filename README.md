@@ -11,5 +11,8 @@ Uses:
 ## TODO:
 * Brute force algorithm
 * Improve performance of genetic and annealing algorithms
+* Improve how SA algorithm ends
 * Improve remove point click radius
 * Improve algorithm summaries
+* Add pause algorithm ability
+

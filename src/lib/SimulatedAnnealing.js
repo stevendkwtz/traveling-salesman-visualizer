@@ -33,7 +33,7 @@ export function simulatedAnnealing (points) {
     best,
     currentSolution,
     tourManager,
-    temp: 1000
+    temp: 10000
   }
 }
 
