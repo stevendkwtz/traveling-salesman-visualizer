@@ -11,13 +11,13 @@ const styles = {
   },
 
   body: {
-    marginLeft: 30,
-    marginRight: 30
+    marginLeft: 45,
+    marginRight: 45
   }
 };
 
 export default class AppHeader extends React.Component {
-  handleChange = (val, event) => {
+  handleChange = (val) => {
     const value = this.props.value === val ? '' : val
     this.props.onSelectTab(value)
   }
@@ -54,9 +54,8 @@ export default class AppHeader extends React.Component {
           <div style={styles.body}>
             <h2 style={styles.headline}>Brute Force Algorithm</h2>
             <p>
-              This algorithm tries every single possible route to find the best route for the salesman.
-
-              TODO! I haven't written this yet :P
+              This algorithm tries every single possible route to find the best route for the salesman. Because it is
+              so expensive in terms of DOM re-rendering, the max number of points is limited to 10 to prevent browser crashes.
             </p>
           </div>
         </Tab>

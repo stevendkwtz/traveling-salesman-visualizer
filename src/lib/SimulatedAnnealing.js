@@ -17,8 +17,8 @@ export function simulatedAnnealing (points) {
   const tourManager = new TourManager()
 
   // Create and add cities to tour manager from points
-  points.forEach((point, index) => {
-    const city = new City(point, index)
+  points.forEach(point => {
+    const city = new City(point)
     tourManager.addCity(city)
   })
 

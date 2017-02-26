@@ -8,6 +8,7 @@ import { dupe, removePoint, hasPoint, randCoordinate, next, getClickLocation } f
 import {tspGA, evolvePopulation} from './lib/TSP_GA'
 import {simulatedAnnealing, annealLoop} from './lib/SimulatedAnnealing'
 import * as types from './constants'
+import {generatePermutations, bruteForceIterate} from './lib/BruteForce'
 
 export default class Canvas extends React.Component {
   constructor (...args) {
@@ -15,6 +16,7 @@ export default class Canvas extends React.Component {
 
     this.state = {
       points: [],
+      cities: [],
       running: false
     }
 
@@ -27,6 +29,7 @@ export default class Canvas extends React.Component {
     this.runSimulatedAnnealingAlgorithm = this.runSimulatedAnnealingAlgorithm.bind(this)
     this.createMapStats = this.createMapStats.bind(this)
     this.createAlgorithmStats = this.createAlgorithmStats.bind(this)
+    this.limitBruceForcePoints = this.limitBruceForcePoints.bind(this)
 
     this.timeouts = {}
   }
@@ -40,7 +43,7 @@ export default class Canvas extends React.Component {
     // Remove point if user clicks on it's radius. TODO: Improve logic so user can click on surrounding pixels
     hasPoint(points, click) ? points = removePoint(points, click) : points.push(click)
 
-    this.setState({points})
+    this.setState({points, cities: this.createCities(points)})
   }
 
   createCities (points) {
@@ -83,7 +86,7 @@ export default class Canvas extends React.Component {
   clearPoints () {
     Object.keys(this.timeouts).forEach(timeout => clearInterval(this.timeouts[timeout]))
 
-    this.setState({points: [], running: false})
+    this.setState({points: [], running: false, cities: []})
   }
 
   addRandomPoints (n) {
@@ -98,7 +101,8 @@ export default class Canvas extends React.Component {
       newPoints.push(newPoint)
     }
 
-    this.setState({points: this.state.points.concat(newPoints)})
+    const points = this.state.points.concat(newPoints)
+    this.setState({points, cities: this.createCities(points) })
   }
 
   runGeneticAlgorithm () {
@@ -120,7 +124,7 @@ export default class Canvas extends React.Component {
     let result = annealLoop(simulatedAnnealing(this.state.points))
 
     const timeoutFunction = () => {
-      this.setState({ points: result.points, distance: Math.round(result.distance), running: true, temp: Math.round(result.temp) })
+      this.setState({ points: result.points, distance: Math.round(result.distance), running: true, temp: result.temp.toFixed(3) })
       result = annealLoop(result)
     }
 
@@ -129,8 +133,29 @@ export default class Canvas extends React.Component {
     }
   }
 
-  runBruteForceAlgorithm () {
+  limitBruceForcePoints () {
+    const points = this.state.points.slice(0,10)
+    this.setState({points, cities: this.createCities(points)})
 
+    return points
+  }
+
+  runBruteForceAlgorithm () {
+    const points = this.limitBruceForcePoints()
+    const perms = generatePermutations(points)
+    let best = perms[0]
+    let result
+
+    const timeoutFunction = (generation) => {
+      result = bruteForceIterate({best, next: perms[generation]})
+      best = result.best
+      this.setState({ points: result.points, distance: Math.round(result.distance), generation})
+    }
+
+
+    for (let i = 1; i < perms.length; i++) {
+      this.timeouts['timeout_' + i] = setTimeout(timeoutFunction.bind(null, i), (20*i))
+    }
   }
 
   runAlgorithm () {
@@ -154,11 +179,11 @@ export default class Canvas extends React.Component {
   createAlgorithmStats () {
     switch (this.props.selectedAlgorithm) {
       case types.GENETIC:
-        return 'Best value: ' + this.state.distance + '. Generation: ' + this.state.generation
+        return 'Best value: ' + this.state.distance + '. Generation: ' + this.state.generation + '. Number of Points: ' + this.state.points.length
       case types.SIMULATED_ANNEALING:
-        return 'Best value: ' + this.state.distance + '. Temperature: ' + this.state.temp
+        return 'Best value: ' + this.state.distance + '. Temperature: ' + this.state.temp + '. Number of Points: ' + this.state.points.length
       case types.BRUTE_FORCE:
-        return ''
+        return 'Best value: ' + this.state.distance + '. Iteration: ' + this.state.generation + '. Number of Points: ' + this.state.points.length
       default:
         return ''
     }
@@ -186,14 +211,14 @@ export default class Canvas extends React.Component {
     return (
       <div>
         <FlatButton label='Add 10 Random Points' onClick={this.addRandomPoints.bind(null, 10)} disabled={this.state.running}/>
-        <FlatButton label='Start' primary={true} onClick={this.runAlgorithm} disabled={this.state.points.length < 3 || !this.props.selectedAlgorithm || this.props.selectedAlgorithm === types.BRUTE_FORCE}/>
+        <FlatButton label='Start' primary={true} onClick={this.runAlgorithm} disabled={this.state.points.length < 3 || !this.props.selectedAlgorithm}/>
         <FlatButton label='Clear All' secondary={true} onClick={this.clearPoints} />
         <p>{stats}</p>
         <div id='canvas-container' onClick={this.handleClick}>
           <Stage width={this.props.canvasWidth} height={this.props.canvasHeight}>
             <Layer>
               {lines}
-              {this.createCities(this.state.points)}
+              {this.state.cities}
             </Layer>
           </Stage>
         </div>
