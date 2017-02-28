@@ -30,8 +30,6 @@ export default class Canvas extends React.Component {
     this.createMapStats = this.createMapStats.bind(this)
     this.createAlgorithmStats = this.createAlgorithmStats.bind(this)
     this.limitBruceForcePoints = this.limitBruceForcePoints.bind(this)
-
-    this.timeouts = {}
   }
 
   handleClick (e) {
@@ -84,7 +82,7 @@ export default class Canvas extends React.Component {
   }
 
   clearPoints () {
-    Object.keys(this.timeouts).forEach(timeout => clearInterval(this.timeouts[timeout]))
+    clearInterval(this.interval)
 
     this.setState({points: [], running: false, cities: []})
   }
@@ -109,28 +107,25 @@ export default class Canvas extends React.Component {
     let points = this.state.points
     let result = evolvePopulation(tspGA(points))
 
-    const timeoutFunction = (generation) => {
+    let generation = 1
+    const intervalFunction = () => {
       this.setState({ points: result.points, fitness: result.fitness, distance: Math.round(result.distance), generation})
       result = evolvePopulation({pop: result.pop, GA: result.GA})
+      generation++
     }
 
-
-    for (let i = 1; i <= 10000; i++) {
-      this.timeouts['timeout_' + i] = setTimeout(timeoutFunction.bind(null, i), (20*i))
-    }
+    this.interval = setInterval(intervalFunction, 20)
   }
 
   runSimulatedAnnealingAlgorithm () {
     let result = annealLoop(simulatedAnnealing(this.state.points))
 
-    const timeoutFunction = () => {
+    const intervalFunction = () => {
       this.setState({ points: result.points, distance: Math.round(result.distance), running: true, temp: result.temp.toFixed(3) })
       result = annealLoop(result)
     }
 
-    for (let i = 1; i <= 10500; i++) {
-      this.timeouts['timeout_' + i] = setTimeout(timeoutFunction, (20*i))
-    }
+    this.interval = setInterval(intervalFunction, (20))
   }
 
   limitBruceForcePoints () {
@@ -146,16 +141,17 @@ export default class Canvas extends React.Component {
     let best = perms[0]
     let result
 
-    const timeoutFunction = (generation) => {
+    let generation = 0
+    const intervalFunction = () => {
       result = bruteForceIterate({best, next: perms[generation]})
       best = result.best
+      generation++
       this.setState({ points: result.points, distance: Math.round(result.distance), generation})
     }
 
 
-    for (let i = 1; i < perms.length; i++) {
-      this.timeouts['timeout_' + i] = setTimeout(timeoutFunction.bind(null, i), (20*i))
-    }
+
+    this.interval = setInterval(intervalFunction, 20)
   }
 
   runAlgorithm () {
