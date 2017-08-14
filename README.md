@@ -1,6 +1,6 @@
 # Traveling Salesman Problem Visualizer
 
-[Live Demo](http://stevendikowitz.com/traveling-salesman-visualizer/)
+[Live Demo](https://stevendikowitz.github.io/traveling-salesman-visualizer/)
 
 ## Description
 Visualizer for various algorithms used to solve the [traveling salesman problem](https://en.wikipedia.org/wiki/Travelling_salesman_problem). This is a work in progress.
